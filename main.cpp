@@ -24,9 +24,11 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #include "common.h"
 #include "godunov.h"
+#include "exact.h"
 #include "variables.h"
 #include "test.h"
 
@@ -43,14 +45,14 @@ int main()
   state lState(1.0, 0.0, 0.0, 0.0, 1.0, gamma, 0.0);
   state rState(0.125  , 0.0, 0.0, 0.0, 0.1 , gamma, 0.0);
 
-  double nM = 21;    // domain size
+  double nM = 1000;    // domain size
   double pD = 0.5;  // diaphragm position percentage
   int nD = 1;        // number of diaphragms (i think)
 
   int    bcL   = 0;   // left boundary condition (0 for transitive, 1 for reflexive)
   int    bcR   = 0;   // right boundary condition (0 for transitive, 1 for reflexive)
   double CFL   = 0.25;
-  double dx    = 0.05;
+  double dx    = 1e-03;
   double rTime = 0.2;
 
   // initial_vector(state C0, state C1, state C2, state C3, double x0, double x1, double x2, double M, int nInt)
@@ -58,21 +60,36 @@ int main()
   std::vector<state> initVec = initial_vector(lState,rState,emptyState,emptyState,pD,0,0,nM,nD);
 
   std::vector<double> inPres = density(initVec);
-  std::cout << "initial density" << std::endl;
-  for (size_t i=0; i<inPres.size(); i++)
-    std::cout << " " << inPres[i];
+  //std::cout << "initial density" << std::endl;
+  //for (size_t i=0; i<inPres.size(); i++)
+  //  std::cout << " " << inPres[i];
 
-  std::cout << "\n" << std::endl;
+  //std::cout << "\n" << std::endl;
 
+  std::cout << "running Godunov solver" << std::endl;
   // godunov(const std::vector<state> & X, int BCL, int BCR, double dx, double C, double t)
   std::vector<state> result = godunov(initVec, bcL, bcR, dx, CFL, rTime);
+  std::cout << "done!" << std::endl;
 
   std::vector<double> fnPres = density(result);
-  std::cout << "final density" << std::endl;
-  for (size_t i=0; i<fnPres.size(); i++)
-    std::cout << " " << fnPres[i];
+  //std::cout << "final density" << std::endl;
+  //for (size_t i=0; i<fnPres.size(); i++)
+  //  std::cout << " " << fnPres[i];
 
-  std::cout << "\n" << std::endl;
+  //std::cout << "\n" << std::endl;
+
+  std::ofstream fileOut;
+  fileOut.open("results.txt");
+  fileOut << "# Euler1D density solution at t=" << rTime << std::endl;
+  fileOut << "# Left state: " << lState.r() << ", " << lState.u() << ", " << lState.p() << std::endl;
+  fileOut << "# Right state: " << rState.r() << ", " << rState.u() << ", " << rState.p() << std::endl;
+  fileOut << "# x r0 rT rExact" << std::endl;
+  for (size_t i=0; i<inPres.size(); i++) {
+    // exact_euler(double x, double t, double x0, state CL, state CR)
+    state exact = exact_euler(i*dx,rTime,pD*nM*dx,lState,rState);
+    fileOut << i*dx << " " << inPres[i] <<  " " << fnPres[i+1] << " " << exact.r() << std::endl;
+  }
+  fileOut.close();
 
   return 0;
 }
