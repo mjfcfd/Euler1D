@@ -1,5 +1,3 @@
-#include <QDebug>
-
 #include <vector>
 
 #include "common.h"

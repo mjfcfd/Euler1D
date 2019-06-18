@@ -5,7 +5,7 @@
 #include <cassert>
 #include <functional>
 #include <vector>
-
+#include <cmath>
 
 double bound_below(double x, double TOL);
 
@@ -113,7 +113,7 @@ std::vector<T> operator* (const Q c, const std::vector<T>& v)
 // Sign function (sign(1)=1, sign(0)=1, sign(-1)=-1)
 template <typename T> int sgn(T val) {
 
-    assert(!isnan(val));
+    assert(!std::isnan(val));
     return (T(0) <= val) - (val < T(0));
 }
 

@@ -1,7 +1,5 @@
 #define NDEBUG
 
-#include <QDebug>
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>

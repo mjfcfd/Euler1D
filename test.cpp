@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 
 #include "variables.h"
 
@@ -7,19 +8,29 @@ std::vector<state> initial_vector(state C0, state C1, state C2, state C3,
                                   double x0, double x1, double x2, double M,
                                   int nInt)
 {
-    std::vector<state> ret(M);
+    // nInt are number of 'diaphragms' dividing initial states
+    // M is the domain size - why is this a double?
+    // x0..x2 are positions of the diaphrams in RATIOS of M
+    // Position: 0.......x0........x1...........x2........M
+    // States:   >--C0---|----C1---|----C2------|---C3---->
+
+    std::cout << "setting initial x0 = " << 100*x0 << "% M = " << M << " C0.p = " << C0.p() << " C1.p = " << C1.p() << std::endl;
+
+    std::vector<state> ret(M); // conversion from double to int???
     for (int i=0; i<M; i++)
     {
         double x = (i+0.5)/M;
 
         if (x <= x0)
+        {
             ret[i] = C0;
-
+        }
         else
         {
             if (nInt == 1 || (nInt > 1 && x <= x1))
+            {
                 ret[i] = C1;
-
+            }
             else
             {
                 if (nInt == 2 || (nInt == 3 && x <= x2))
@@ -64,8 +75,9 @@ std::vector<double> pressure(const std::vector<state> & X)
 
     int n = X.size();
     std::vector<double> ret(n);
-    for (int i=0; i<n; i++)
+    for (int i=0; i<n; i++){
         ret[i] = X[i].p();
+    }
     return ret;
 }
 
